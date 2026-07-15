@@ -1,18 +1,21 @@
 # Build stage
-FROM gradle:8.7-jdk17 AS builder
+FROM eclipse-temurin:17-jdk-alpine AS builder
 
 WORKDIR /app
 
-# Copy gradle files
-COPY demo/build.gradle.kts .
+# Copy project files
 COPY demo/gradle gradle
+COPY demo/gradlew .
+COPY demo/gradlew.bat .
+COPY demo/build.gradle.kts .
 COPY demo/settings.gradle.kts .
-
-# Copy source code
 COPY demo/src src
 
+# Make gradle executable
+RUN chmod +x gradlew
+
 # Build the application
-RUN gradle build -x test --no-daemon
+RUN ./gradlew build -x test --no-daemon -Dorg.gradle.jvmargs="-Xmx512m"
 
 # Runtime stage
 FROM eclipse-temurin:17-jre-alpine
